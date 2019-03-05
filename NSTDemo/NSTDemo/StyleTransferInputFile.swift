@@ -6,9 +6,10 @@
 //  Copyright © 2019 Mars and Paris. All rights reserved.
 //
 
+import UIKit
 import CoreML
 
-internal class StyleTransferInputFile : MLFeatureProvider {
+internal class StyleTransferInputFile: MLFeatureProvider {
     
     internal var input: CVPixelBuffer
     
