@@ -23,14 +23,17 @@ extension UIImage {
     func cropped(height: CGFloat, width: CGFloat) -> UIImage? {
         
         // check new dimensions are not larger than original dimensions
-        if self.size.height > height || self.size.width > width {
+        if self.size.height < height || self.size.width < width {
+            print("Not large enough to crop UIImage: " + self.description)
             return self
         }
         
         // calculate new image dimensions and offset
         let heightDifference = self.size.height - height
         let widthDifference = self.size.width - width
-        let newRect = CGRect(x: widthDifference / 2.0, y: heightDifference / 2.0, width: self.size.width - widthDifference, height: self.size.height - widthDifference)
+        // TODO: fix cropping
+        // let newRect = CGRect(x: widthDifference / 2.0, y: heightDifference / 2.0, width: width, height: height)
+        let newRect = CGRect(x: 0.0, y: 0.0, width: width, height: height)
         
         // convert to cgimage and back for use of pre-existing functionality for cropping
         guard let croppedCGImage = self.cgImage?.cropping(to: newRect) else {

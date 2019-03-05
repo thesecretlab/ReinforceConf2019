@@ -36,59 +36,85 @@ enum StyleModel {
     }
 }
 
-class ViewController: UIViewController, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
+class ViewController: UIViewController, UINavigationControllerDelegate {
     
+    @IBOutlet weak var shareButton: UIBarButtonItem!
     @IBOutlet weak var imageView: UIImageView!
+    @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
     
-    private var selectedImage: UIImage! { return self.imageView.image }
+    @IBOutlet weak var transferStyleButton: UIButton!
+    private var modelSelection: StyleModel!
+    private var imageSelection: UIImage!
     
-    // model and image to use (will not be nil when accessed)
-    private var model: StyleModel!
+    @IBAction func selectButtonPressed(_ sender: Any) {
+        summonImagePicker()
+    }
+    
+    @IBAction func shareButtonPressed(_ sender: Any) {
+        summonShareSheet()
+    }
+    
+    @IBAction func transferStyleButtonPressed(_ sender: Any) {
+        performStyleTransfer()
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         imageView.contentMode = .scaleAspectFill
         
+        // TODO: remove
+        modelSelection = .wave
+        
         // add a gesture recognizer to uiimageview that will trigger image picker
-        let gestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(imageViewPressed))
-        gestureRecognizer .numberOfTapsRequired = 1
+        let gestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(summonImagePicker))
+        gestureRecognizer.numberOfTapsRequired = 1
         imageView.isUserInteractionEnabled = true
         imageView.addGestureRecognizer(gestureRecognizer )
     }
     
-    @IBAction func transferStyleButtonPressed(_ sender: Any) {
+    @objc private func summonImagePicker() {
+        let imagePicker = UIImagePickerController()
+        imagePicker.delegate = self
+        imagePicker.sourceType = .photoLibrary
+        imagePicker.allowsEditing = false
+        imagePicker.mediaTypes = [kUTTypeImage as String]
+        
+        present(imagePicker, animated: true)
+    }
+    
+    private func summonShareSheet() {
+        let shareSheet = UIActivityViewController(activityItems: [imageSelection as Any], applicationActivities: nil)
+        present(shareSheet, animated: true)
+    }
+    
+    private func performStyleTransfer() {
+        activityIndicator.startAnimating()
         
         // create asynchronous but high-priority queue to style image without hanging app
         DispatchQueue.global(qos: .userInteractive).async {
-            let newImage = self.styledImage(self.selectedImage)
+            let newImage = self.styledImage(self.imageSelection)
             
             DispatchQueue.main.async {
                 self.imageView.image = newImage
+                self.activityIndicator.stopAnimating()
+                self.shareButton.isEnabled = true
             }
         }
-    }
-    
-    @objc private func imageViewPressed() {
-        let imagePicker = UIImagePickerController()
-        imagePicker.sourceType = .photoLibrary
-        imagePicker.allowsEditing = false
-        imagePicker.delegate = self
-        imagePicker.mediaTypes = [kUTTypeImage as String]
-        
-        present(imagePicker, animated: true, completion: nil)
     }
     
     private func styledImage(_ image: UIImage) -> UIImage? {
         var inputImage = image
         
         // verify that model does not have input constraints or, if it does, that we can adhere to them before continuing
-        if let inputConstraints = model.dimensionConstraints {
+        if let inputConstraints = modelSelection.dimensionConstraints {
             guard let croppedImage = image.cropped(height: inputConstraints.height, width: inputConstraints.width) else {
                 // TODO: present error?
                 // TODO: recover
                 return nil
             }
+            
+            print("Image cropped to \(inputConstraints.height) * \(inputConstraints.width) now sized: \(croppedImage.size.height) * \(croppedImage.size.width)\n\n")
             
             inputImage = croppedImage
         }
@@ -100,37 +126,48 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
             return nil
         }
         
-//
-//        let outFeatures = try! model.prediction(from: input)
-//
-//        let output = outFeatures.featureValue(for: "add_37__0")!.imageBufferValue!
-//
-//        CVPixelBufferLockBaseAddress(output, .readOnly)
-//
-//        let width = CVPixelBufferGetWidth(output)
-//
-//        let height = CVPixelBufferGetHeight(output)
-//
-//        let data = CVPixelBufferGetBaseAddress(output)!
-//
-//        let outContext = CGContext(data: data, width: width, height: height, bitsPerComponent: 8, bytesPerRow: CVPixelBufferGetBytesPerRow(output), space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: CGImageByteOrderInfo.order32Little.rawValue | CGImageAlphaInfo.noneSkipFirst.rawValue)!
-//
-//        let outImage = outContext.makeImage()!
-//
-//        CVPixelBufferUnlockBaseAddress(output, .readOnly)
+
+        // TODO: fix
+        print("Cropped image size: \(inputImage.size.height) * \(inputImage.size.width)\n\n")
+        let input = StyleTransferInputFile(input: inputPixelBuffer)
+        let outFeatures = try! modelSelection.model.prediction(from: input)
+        let output = outFeatures.featureValue(for: "add_37__0")!.imageBufferValue!
+
+        CVPixelBufferLockBaseAddress(output, .readOnly)
+        let width = CVPixelBufferGetWidth(output)
+        let height = CVPixelBufferGetHeight(output)
+        let data = CVPixelBufferGetBaseAddress(output)!
+        let outContext = CGContext(data: data, width: width, height: height, bitsPerComponent: 8, bytesPerRow: CVPixelBufferGetBytesPerRow(output), space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: CGImageByteOrderInfo.order32Little.rawValue | CGImageAlphaInfo.noneSkipFirst.rawValue)!
+        let outputImage = outContext.makeImage()!
+        CVPixelBufferUnlockBaseAddress(output, .readOnly)
         
-        return image
+        return UIImage(cgImage: outputImage)
     }
+}
+
+extension ViewController: UIImagePickerControllerDelegate {
     
     internal func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+        self.shareButton.isEnabled = false
         if let image = info [UIImagePickerController.InfoKey.originalImage] as? UIImage {
-            imageView.image = image
+            if let inputConstraints = modelSelection.dimensionConstraints {
+                guard let croppedImage = image.cropped(height: inputConstraints.height, width: inputConstraints.width) else {
+                    // TODO: present error?
+                    // TODO: recover
+                    return
+                }
+                
+                imageSelection = croppedImage
+                imageView.image = imageSelection ?? UIImage.placeholder
+            }
+            
+            // TODO: fix
+            // imageSelection = image
         } else {
             // TODO: present error?
             // TODO: recover
         }
         
-        picker.dismiss(animated: true, completion: nil)
+        picker.dismiss(animated: true)
     }
 }
-
