@@ -11,6 +11,15 @@ import MobileCoreServices
 import Photos
 import CoreML
 
+// TODO: button disabled unless both input image and style model selections are valid
+// TODO: style model selection
+// TODO: nicer functions for applying style transfer
+// TODO: verify accent colours
+// TODO: visual niceties
+// TODO: app icon
+// TODO: launch screen
+// TODO: save/share styled image?
+
 enum StyleModel {
     case wave
     
