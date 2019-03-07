@@ -16,32 +16,61 @@ extension CVPixelBufferLockFlags {
     static let readAndWrite = CVPixelBufferLockFlags(rawValue: 0)
 }
 
+extension UIColor {
+    static let systemBlue = UIColor(red: 0/255, green: 122/255, blue: 255/255, alpha: 1)
+}
+
+extension UIButton {
+    func enable() {
+        self.isEnabled = true
+        self.backgroundColor = UIColor.systemBlue
+    }
+    
+    func disable() {
+        self.isEnabled = false
+        self.backgroundColor = UIColor.lightGray
+    }
+}
+
+extension UIBarButtonItem {
+    func enable() {
+        self.isEnabled = true
+    }
+    
+    func disable() {
+        self.isEnabled = false
+    }
+}
+
 extension UIImage {
     
     static var placeholder = UIImage(named: "placeholder.png")!
     
-    func cropped(height: CGFloat, width: CGFloat) -> UIImage? {
-        
-        // check new dimensions are not larger than original dimensions
-        if self.size.height < height || self.size.width < width {
-            print("Not large enough to crop UIImage: " + self.description)
-            return self
-        }
-        
-        // calculate new image dimensions and offset
-        let heightDifference = self.size.height - height
-        let widthDifference = self.size.width - width
-        // TODO: fix cropping
-        // let newRect = CGRect(x: widthDifference / 2.0, y: heightDifference / 2.0, width: width, height: height)
-        let newRect = CGRect(x: 0.0, y: 0.0, width: width, height: height)
-        
-        // convert to cgimage and back for use of pre-existing functionality for cropping
-        guard let croppedCGImage = self.cgImage?.cropping(to: newRect) else {
-            print("Casting self.cgImage attribute failed during cropped(height:width:) call of UIImage: " + self.description)
-            return nil
-        }
-        
-        return UIImage(cgImage: croppedCGImage)
+    func styled(with modelSelection: StyleModel) -> UIImage? {
+        let ciImage: CIImage = CIImage(cgImage: self.cgImage!)
+        let flippedImage = ciImage.transformed(by: CGAffineTransform(scaleX: -1, y: 1))
+        let outputImage = UIImage(ciImage: flippedImage)
+        return outputImage
+//        // verify that image pixel buffer conversion is successful before continuing
+//        guard let inputPixelBuffer = self.pixelBuffer() else {
+//            completion(nil)
+//            return
+//        }
+//
+//        // TODO: fix
+//        let input = StyleTransferInputFile(input: inputPixelBuffer)
+//        let outFeatures = try! modelSelection.model.prediction(from: input)
+//        let output = outFeatures.featureValue(for: "add_37__0")!.imageBufferValue!
+//
+//        CVPixelBufferLockBaseAddress(output, .readOnly)
+//        let width = CVPixelBufferGetWidth(output)
+//        let height = CVPixelBufferGetHeight(output)
+//        let data = CVPixelBufferGetBaseAddress(output)!
+//        let outContext = CGContext(data: data, width: width, height: height, bitsPerComponent: 8, bytesPerRow: CVPixelBufferGetBytesPerRow(output), space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: CGImageByteOrderInfo.order32Little.rawValue | CGImageAlphaInfo.noneSkipFirst.rawValue)!
+//        let outputImage = outContext.makeImage()!
+//        CVPixelBufferUnlockBaseAddress(output, .readOnly)
+//
+//        completion(UIImage(cgImage: outputImage))
     }
     
     func pixelBuffer() -> CVPixelBuffer? {
