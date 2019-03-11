@@ -13,8 +13,6 @@ import CoreML
 
 // TODO: nicer functions for applying style transfer
 // TODO: visual niceties
-// TODO: app icon
-// TODO: launch screen
 // TODO: save/share styled image?
 
 enum StyleModel: String, CaseIterable {
@@ -97,8 +95,7 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIPicker
     
     private func summonShareSheet() {
         guard let outputImage = outputImage else {
-            // TODO: present error
-            // TODO: recover
+            summonAlertView()
             return
         }
         
@@ -106,12 +103,22 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIPicker
         present(shareSheet, animated: true)
     }
     
+    private func summonAlertView(message: String? = nil) {
+        let alertController = UIAlertController(
+            title: "Error",
+            message: message ?? "Action could not be completed.",
+            preferredStyle: .alert
+        )
+        
+        alertController.addAction(UIAlertAction(title: "OK", style: .default))
+        present(alertController, animated: true)
+    }
+    
     // MARK: Functionality
     
     private func performStyleTransfer() {
         guard let styledImage = inputImage?.styled(with: self.modelSelection) else {
-            // TODO: present error
-            // TODO: recover
+            summonAlertView()
             return
         }
         
