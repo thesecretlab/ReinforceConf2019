@@ -17,8 +17,12 @@ import CoreML
 // TODO: launch screen
 // TODO: save/share styled image?
 
-enum StyleModel: CaseIterable {
-    case wave, scream, berries, sprinkles, hungary, other
+enum StyleModel: String, CaseIterable {
+    case wave = "The Great Wave"
+    case night = "Starry Night"
+    case scream = "The Scream"
+    case starfleet = "Starfleet"
+    case jupiter = "The Surface of Jupiter"
     
     var model: MLModel {
         switch self {
@@ -26,17 +30,20 @@ enum StyleModel: CaseIterable {
         }
     }
     
-    var name: String { return String(describing: self).capitalized }
+    var name: String { return self.rawValue }
     static func `case`(for index: Int) -> StyleModel { return StyleModel.allCases[index] }
 }
 
 class ViewController: UIViewController, UINavigationControllerDelegate, UIPickerViewDelegate {
     
+    // MARK: Outlets
+    
     @IBOutlet weak var shareButton: UIBarButtonItem!
     @IBOutlet weak var imageView: UIImageView!
-    @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
     @IBOutlet weak var modelSelector: UIPickerView!
     @IBOutlet weak var transferStyleButton: UIButton!
+    
+    // MARK: Actions
     
     @IBAction func selectButtonPressed(_ sender: Any) { summonImagePicker() }
     @IBAction func shareButtonPressed(_ sender: Any) {summonShareSheet() }
@@ -49,13 +56,15 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIPicker
         return StyleModel.case(for: selectedModelIndex)
     }
     
+    // MARK: View Functions
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
         modelSelector.delegate = self
         modelSelector.dataSource = self
         imageView.contentMode = .scaleAspectFill
-        
+    
         refresh()
     }
     
@@ -75,6 +84,8 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIPicker
         }
     }
     
+    // MARK: Supplementary View Functions
+    
     @objc private func summonImagePicker() {
         let imagePicker = UIImagePickerController()
         imagePicker.delegate = self
@@ -85,12 +96,19 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIPicker
     }
     
     private func summonShareSheet() {
+        guard let outputImage = outputImage else {
+            // TODO: present error
+            // TODO: recover
+            return
+        }
+        
         let shareSheet = UIActivityViewController(activityItems: [outputImage as Any], applicationActivities: nil)
         present(shareSheet, animated: true)
     }
     
+    // MARK: Functionality
+    
     private func performStyleTransfer() {
-        activityIndicator.startAnimating()
         guard let styledImage = inputImage?.styled(with: self.modelSelection) else {
             // TODO: present error
             // TODO: recover
@@ -99,7 +117,6 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIPicker
         
         outputImage = styledImage
         refresh()
-        activityIndicator.stopAnimating()
     }
 }
 

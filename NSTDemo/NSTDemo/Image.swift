@@ -12,13 +12,46 @@
 import UIKit
 import CoreML
 
+// MARK: CVPixelBuffer Extensions
+
 extension CVPixelBufferLockFlags {
     static let readAndWrite = CVPixelBufferLockFlags(rawValue: 0)
 }
 
+extension CVPixelBuffer {
+    var width: Int { return CVPixelBufferGetWidth(self) }
+    var height: Int { return CVPixelBufferGetHeight(self) }
+    var bytesPerRow: Int { return CVPixelBufferGetBytesPerRow(self) }
+    var baseAddress: UnsafeMutableRawPointer? { return CVPixelBufferGetBaseAddress(self) }
+}
+
+// MARK: CGContext Extensions
+
+extension CGColorSpace {
+    static var deviceRGB: CGColorSpace { return CGColorSpaceCreateDeviceRGB() }
+}
+
+extension CGContext {
+    static func createContext(for pixelBuffer: CVPixelBuffer) -> CGContext? {
+        return CGContext(
+            data: pixelBuffer.baseAddress,
+            width: pixelBuffer.width,
+            height: pixelBuffer.height,
+            bitsPerComponent: 8,
+            bytesPerRow: pixelBuffer.bytesPerRow,
+            space: CGColorSpace.deviceRGB,
+            bitmapInfo: CGBitmapInfo.byteOrder32Little.rawValue | CGImageAlphaInfo.noneSkipFirst.rawValue
+        )
+    }
+}
+
+// MARK: UIColor Extensions
+
 extension UIColor {
     static let systemBlue = UIColor(red: 0/255, green: 122/255, blue: 255/255, alpha: 1)
 }
+
+// MARK: UIButton/UIControl  Extensions
 
 extension UIButton {
     func enable() {
@@ -33,14 +66,11 @@ extension UIButton {
 }
 
 extension UIBarButtonItem {
-    func enable() {
-        self.isEnabled = true
-    }
-    
-    func disable() {
-        self.isEnabled = false
-    }
+    func enable() { self.isEnabled = true }
+    func disable() { self.isEnabled = false }
 }
+
+// MARK: UIImage Extensions
 
 extension UIImage {
     
@@ -51,29 +81,34 @@ extension UIImage {
         let flippedImage = ciImage.transformed(by: CGAffineTransform(scaleX: -1, y: 1))
         let outputImage = UIImage(ciImage: flippedImage)
         return outputImage
+        
 //        // verify that image pixel buffer conversion is successful before continuing
 //        guard let inputPixelBuffer = self.pixelBuffer() else {
-//            completion(nil)
-//            return
+//            // TODO: error
+//            // TODO: recover
+//            return nil
 //        }
 //
 //        // TODO: fix
 //        let input = StyleTransferInputFile(input: inputPixelBuffer)
 //        let outFeatures = try! modelSelection.model.prediction(from: input)
 //        let output = outFeatures.featureValue(for: "add_37__0")!.imageBufferValue!
+//        let outputPixelBuffer = inputPixelBuffer
 //
-//        CVPixelBufferLockBaseAddress(output, .readOnly)
-//        let width = CVPixelBufferGetWidth(output)
-//        let height = CVPixelBufferGetHeight(output)
-//        let data = CVPixelBufferGetBaseAddress(output)!
-//        let outContext = CGContext(data: data, width: width, height: height, bitsPerComponent: 8, bytesPerRow: CVPixelBufferGetBytesPerRow(output), space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: CGImageByteOrderInfo.order32Little.rawValue | CGImageAlphaInfo.noneSkipFirst.rawValue)!
-//        let outputImage = outContext.makeImage()!
-//        CVPixelBufferUnlockBaseAddress(output, .readOnly)
+//        CVPixelBufferLockBaseAddress(outputPixelBuffer, .readOnly)
+//        guard let outputContext = CGContext.createContext(for: outputPixelBuffer) else {
+//            print("CGContext initialisation failed during styled(with:) call of UIImage: " + self.description)
+//            CVPixelBufferUnlockBaseAddress(outputPixelBuffer, .readOnly)
+//            return nil
+//        }
+//        let outputImage = outputContext.makeImage()!
+//        CVPixelBufferUnlockBaseAddress(outputPixelBuffer, .readOnly)
 //
-//        completion(UIImage(cgImage: outputImage))
+//        return UIImage(cgImage: outputImage)
     }
     
     func pixelBuffer() -> CVPixelBuffer? {
+        let dimensions: (height: Int, width: Int) = (Int(self.size.width), Int(self.size.height))
         
         // verify that cgimage conversion was successful before continuing
         guard let image = self.cgImage else {
@@ -81,51 +116,30 @@ extension UIImage {
             return nil
         }
         
-        // get image attributes
-        let dimensions = (width: Int(self.size.width), height: Int(self.size.height))
-        let attributes = [kCVPixelBufferCGImageCompatibilityKey: kCFBooleanTrue,
-                     kCVPixelBufferCGBitmapContextCompatibilityKey: kCFBooleanTrue] as CFDictionary
-        var pixelBuffer: CVPixelBuffer?
-        
         // attempt creation of a pixel buffer for the given image size
+        var pixelBuffer: CVPixelBuffer?
         let status = CVPixelBufferCreate(
             kCFAllocatorDefault,
             dimensions.width,
             dimensions.height,
             kCVPixelFormatType_32BGRA,
-            attributes,
+            [kCVPixelBufferCGImageCompatibilityKey: kCFBooleanTrue,
+             kCVPixelBufferCGBitmapContextCompatibilityKey: kCFBooleanTrue] as CFDictionary,
             &pixelBuffer
         )
         
-        // verify that pixel buffer creation was successful before continuing
+        // verify that image pixel buffer creation was successful before continuing
         guard let createdPixelBuffer = pixelBuffer, status == kCVReturnSuccess else {
             print("CVPixelBufferCreate failed during pixelBuffer() call of UIImage: " + self.description)
             return nil
         }
         
-        // attempt creation of a core graphics context with the given image attributes
         CVPixelBufferLockBaseAddress(createdPixelBuffer, .readAndWrite)
-        let pixelData = CVPixelBufferGetBaseAddress(createdPixelBuffer)
-        let rgbColorSpace = CGColorSpaceCreateDeviceRGB()
-        let bitmapInfo = CGBitmapInfo(rawValue: CGBitmapInfo.byteOrder32Little.rawValue | CGImageAlphaInfo.noneSkipFirst.rawValue)
-        let coreGraphicsContext = CGContext(
-            data: pixelData,
-            width: dimensions.width,
-            height: dimensions.height,
-            bitsPerComponent: 8,
-            bytesPerRow: CVPixelBufferGetBytesPerRow(createdPixelBuffer),
-            space: rgbColorSpace,
-            bitmapInfo: bitmapInfo.rawValue
-        )
-        
-        // verify that core graphics context creation was successful before continuing
-        guard let graphicsContext = coreGraphicsContext else {
+        guard let graphicsContext = CGContext.createContext(for: createdPixelBuffer) else {
             print("CGContext initialisation failed during pixelBuffer() call of UIImage: " + self.description)
             CVPixelBufferUnlockBaseAddress(createdPixelBuffer, .readAndWrite)
             return nil
         }
-        
-        // draw image into created core graphics pixel buffer
         graphicsContext.draw(image, in: CGRect(x: 0, y: 0, width: dimensions.width, height: dimensions.height))
         CVPixelBufferUnlockBaseAddress(createdPixelBuffer, .readAndWrite)
         

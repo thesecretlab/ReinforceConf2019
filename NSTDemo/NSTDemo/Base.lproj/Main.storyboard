@@ -24,9 +24,6 @@
                                     <constraint firstAttribute="width" secondItem="7Yg-bG-rtr" secondAttribute="height" multiplier="1:1" id="2e0-4S-X2w"/>
                                 </constraints>
                             </imageView>
-                            <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="IgZ-ZT-qJN">
-                                <rect key="frame" x="188.5" y="276.5" width="37" height="37"/>
-                            </activityIndicatorView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" adjustsImageWhenHighlighted="NO" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="DN9-1e-a5h">
                                 <rect key="frame" x="8" y="794" width="398" height="60"/>
                                 <color key="backgroundColor" red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
@@ -89,20 +86,17 @@
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="DN9-1e-a5h" secondAttribute="trailing" constant="8" id="a8E-EN-0cR"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="DN9-1e-a5h" secondAttribute="bottom" constant="8" id="b0K-YU-Eh8"/>
                             <constraint firstItem="7Yg-bG-rtr" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="ckg-Ob-KcT"/>
-                            <constraint firstItem="IgZ-ZT-qJN" firstAttribute="centerY" secondItem="7Yg-bG-rtr" secondAttribute="centerY" id="eAp-99-Spf"/>
                             <constraint firstItem="DN9-1e-a5h" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="8" id="edK-qU-cQc"/>
                             <constraint firstItem="7Yg-bG-rtr" firstAttribute="trailing" secondItem="6Tk-OE-BBY" secondAttribute="trailing" id="hVI-Nj-pni"/>
                             <constraint firstItem="dwN-0J-Pp3" firstAttribute="trailing" secondItem="6Tk-OE-BBY" secondAttribute="trailing" id="jtU-Fp-IGz"/>
                             <constraint firstItem="fEa-ae-nPD" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="mPJ-fD-1pL"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="YKg-wr-gc3" secondAttribute="trailing" constant="8" id="n4d-T5-7KB"/>
                             <constraint firstItem="7Yg-bG-rtr" firstAttribute="top" secondItem="fEa-ae-nPD" secondAttribute="bottom" id="oKI-vL-G13"/>
-                            <constraint firstItem="IgZ-ZT-qJN" firstAttribute="centerX" secondItem="7Yg-bG-rtr" secondAttribute="centerX" id="oXd-Xs-tGZ"/>
                             <constraint firstItem="DN9-1e-a5h" firstAttribute="top" secondItem="dwN-0J-Pp3" secondAttribute="bottom" constant="8" id="r1p-08-6MW"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                     </view>
                     <connections>
-                        <outlet property="activityIndicator" destination="IgZ-ZT-qJN" id="1Ok-Jn-oUl"/>
                         <outlet property="imageView" destination="7Yg-bG-rtr" id="9SE-Yz-sRU"/>
                         <outlet property="modelSelector" destination="dwN-0J-Pp3" id="ZMe-tm-1a9"/>
                         <outlet property="shareButton" destination="cIK-Q7-feP" id="ixs-Ny-Nd5"/>
@@ -115,6 +109,6 @@
         </scene>
     </scenes>
     <resources>
-        <image name="placeholder" width="4000" height="4000"/>
+        <image name="placeholder" width="1500" height="1500"/>
     </resources>
 </document>

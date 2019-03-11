@@ -43,5 +43,9 @@
 	</array>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Required to save or share transformed images</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Required to save or share transformed images</string>
+	<key>UIStatusBarHidden</key>
+	<true/>
 </dict>
 </plist>
