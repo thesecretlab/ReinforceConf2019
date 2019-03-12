@@ -127,7 +127,7 @@ extension UIImage{
         
         if min(widthDifference, heightDifference) < 0 || widthDifference + heightDifference == 0 {
             print("Not large enough to crop UIImage: " + self.description)
-            return self
+            return nil
         }
 
         let newRect = CGRect(x: widthDifference / 2, y: heightDifference / 2, width: width, height: height)

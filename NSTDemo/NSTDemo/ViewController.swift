@@ -34,7 +34,7 @@ enum StyleModel: String, CaseIterable {
     }
     
     var name: String { return self.rawValue }
-    var constraints: CGSize { return CGSize(width: 800, height: 800) }
+    static var constraints: CGSize { return CGSize(width: 800, height: 800) }
     static func `case`(for index: Int) -> StyleModel { return StyleModel.allCases[index] }
 }
 
@@ -135,11 +135,15 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIPicker
 extension ViewController: UIImagePickerControllerDelegate {
     @objc func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
         let rawImage = info[UIImagePickerController.InfoKey.originalImage] as? UIImage
-        inputImage = rawImage?.aspectFillCropped(to: modelSelection.constraints)
+        inputImage = rawImage?.aspectFillCropped(to: StyleModel.constraints)
         outputImage = nil
         
         picker.dismiss(animated: true)
         refresh()
+        
+        if inputImage == nil {
+            summonAlertView(message: "Image was malformed or too small (must be at least \(StyleModel.constraints.width) * \(StyleModel.constraints.height)).")
+        }
     }
 }
 
