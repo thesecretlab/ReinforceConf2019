@@ -34,7 +34,7 @@ enum StyleModel: String, CaseIterable {
     }
     
     var name: String { return self.rawValue }
-    var constraints: CGSize { return CGSize(width: 800, height: 600) }
+    var constraints: CGSize { return CGSize(width: 800, height: 800) }
     static func `case`(for index: Int) -> StyleModel { return StyleModel.allCases[index] }
 }
 
