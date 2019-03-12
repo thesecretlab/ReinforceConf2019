@@ -24,10 +24,6 @@ enum StyleModel: String, CaseIterable {
     case starfleet = "Starfleet"
     case jupiter = "The Surface of Jupiter"
     
-    static var constraints: (width: CGFloat, height: CGFloat) {
-        return (800, 600)
-    }
-    
     var styleArray: MLMultiArray {
         guard let styleArray = try? MLMultiArray(shape: [1] as [NSNumber], dataType: MLMultiArrayDataType.double) else {
             fatalError("Could not initialise MLMultiArray for MLModel options.")
@@ -38,6 +34,7 @@ enum StyleModel: String, CaseIterable {
     }
     
     var name: String { return self.rawValue }
+    var constraints: CGSize { return CGSize(width: 800, height: 600) }
     static func `case`(for index: Int) -> StyleModel { return StyleModel.allCases[index] }
 }
 
@@ -138,7 +135,7 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIPicker
 extension ViewController: UIImagePickerControllerDelegate {
     @objc func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
         let rawImage = info[UIImagePickerController.InfoKey.originalImage] as? UIImage
-        inputImage = rawImage?.aspectCropped(to: modelSelection.constraints)
+        inputImage = rawImage?.aspectFillCropped(to: modelSelection.constraints)
         outputImage = nil
         
         picker.dismiss(animated: true)

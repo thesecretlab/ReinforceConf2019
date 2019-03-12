@@ -106,29 +106,31 @@ extension UIImage{
         return outputImage
     }
     
-    func aspectCropped(to desiredDimensions: (width: CGFloat, height: CGFloat)) -> UIImage? {
+    func aspectFillCropped(to size: CGSize) -> UIImage? {
+        let (width, height) = (Int(size.width), Int(size.height))
         let aspectRatio: CGFloat = self.size.width / self.size.height
-        let resizedImage: UIImage?
+        let intermediateSize: CGSize
         
         if aspectRatio > 0 {
-            resizedImage = self.resized(width: aspectRatio * desiredDimensions.height, height: desiredDimensions.height)
+            intermediateSize = CGSize(width: Int(aspectRatio * size.height), height: height)
         } else {
-            resizedImage = self.resized(width: desiredDimensions.width, height: aspectRatio * desiredDimensions.width)
+            intermediateSize = CGSize(width: width, height: Int(aspectRatio * size.width))
         }
         
-        return resizedImage?.cropped(width: desiredDimensions.width, height: desiredDimensions.height)
+        return self.resized(to: intermediateSize)?.cropped(to: size)
     }
     
-    func cropped(width: CGFloat, height: CGFloat) -> UIImage? {
-        let widthDifference = self.size.width - width
-        let heightDifference = self.size.height - height
+    func cropped(to size: CGSize) -> UIImage? {
+        let widthDifference = Int(self.size.width - size.width)
+        let heightDifference = Int(self.size.height - size.height)
+        let (width, height) = (Int(size.width), Int(size.height))
         
-        if min(widthDifference, heightDifference) < 0 {
+        if min(widthDifference, heightDifference) < 0 || widthDifference + heightDifference == 0 {
             print("Not large enough to crop UIImage: " + self.description)
             return self
         }
 
-        let newRect = CGRect(x: widthDifference / 2.0, y: heightDifference / 2.0, width: width, height: height)
+        let newRect = CGRect(x: widthDifference / 2, y: heightDifference / 2, width: width, height: height)
         guard let croppedCGImage = self.cgImage?.cropping(to: newRect) else {
             print("Casting self.cgImage attribute failed during cropped(height:width:) call of UIImage: " + self.description)
             return nil
@@ -137,11 +139,10 @@ extension UIImage{
         return UIImage(cgImage: croppedCGImage)
     }
     
-    func resized(width: CGFloat, height: CGFloat) -> UIImage? {
-        let newSize = CGSize(width: width, height: height)
-        let newRect = CGRect(origin: CGPoint.zero, size: newSize)
+    func resized(to size: CGSize) -> UIImage? {
+        let newRect = CGRect(origin: CGPoint.zero, size: size)
         
-        UIGraphicsBeginImageContextWithOptions(newSize, false, 0.0)
+        UIGraphicsBeginImageContextWithOptions(size, false, 0.0)
         self.draw(in: newRect)
         let newImage = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
