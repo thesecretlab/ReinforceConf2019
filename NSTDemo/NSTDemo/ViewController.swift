@@ -12,6 +12,8 @@ import Photos
 import CoreML
 
 // TODO: nicer functions for applying style transfer
+// TODO: import image crop/resize to MLModel dimensions
+// TODO: crop output to 600 * 600
 // TODO: visual niceties
 // TODO: save/share styled image?
 
@@ -22,10 +24,17 @@ enum StyleModel: String, CaseIterable {
     case starfleet = "Starfleet"
     case jupiter = "The Surface of Jupiter"
     
-    var model: MLModel {
-        switch self {
-            default: return Wave().model
+    static var constraints: (width: CGFloat, height: CGFloat) {
+        return (800, 600)
+    }
+    
+    var styleArray: MLMultiArray {
+        guard let styleArray = try? MLMultiArray(shape: [1] as [NSNumber], dataType: MLMultiArrayDataType.double) else {
+            fatalError("Could not initialise MLMultiArray for MLModel options.")
         }
+        
+        styleArray[0] = 1.0
+        return styleArray
     }
     
     var name: String { return self.rawValue }
@@ -88,7 +97,6 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIPicker
         let imagePicker = UIImagePickerController()
         imagePicker.delegate = self
         imagePicker.sourceType = .photoLibrary
-        imagePicker.allowsEditing = true
         imagePicker.mediaTypes = [kUTTypeImage as String]
         present(imagePicker, animated: true)
     }
@@ -117,7 +125,7 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIPicker
     // MARK: Functionality
     
     private func performStyleTransfer() {
-        guard let styledImage = inputImage?.styled(with: self.modelSelection) else {
+        guard let styledImage = inputImage?.styled(with: modelSelection) else {
             summonAlertView()
             return
         }
@@ -129,8 +137,10 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIPicker
 
 extension ViewController: UIImagePickerControllerDelegate {
     @objc func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
+        let rawImage = info[UIImagePickerController.InfoKey.originalImage] as? UIImage
+        inputImage = rawImage?.aspectCropped(to: modelSelection.constraints)
         outputImage = nil
-        inputImage = info[UIImagePickerController.InfoKey.originalImage] as? UIImage
+        
         picker.dismiss(animated: true)
         refresh()
     }

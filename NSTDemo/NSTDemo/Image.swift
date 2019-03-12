@@ -87,18 +87,16 @@ extension UIBarButtonItem {
 
 // MARK: UIImage Extensions
 
-extension UIImage {
+extension UIImage{
     
     static var placeholder = UIImage(named: "placeholder.png")!
     
     func styled(with modelSelection: StyleModel) -> UIImage? {
         guard let inputPixelBuffer = self.pixelBuffer() else { return nil }
 
-        // TODO: fix
-//        let input = StyleTransferInputFile(input: inputPixelBuffer)
-//        let outFeatures = try! modelSelection.model.prediction(from: input)
-//        let output = outFeatures.featureValue(for: "add_37__0")!.imageBufferValue!
-        let outputPixelBuffer = inputPixelBuffer
+        let model = Jupiter()
+        let transformation = try? model.prediction(image: inputPixelBuffer, index: modelSelection.styleArray)
+        guard let outputPixelBuffer = transformation?.stylizedImage else { return nil }
         
         let outputImage = outputPixelBuffer.perform(permission: .readOnly) {
             guard let outputContext = CGContext.createContext(for: outputPixelBuffer) else { return nil }
@@ -106,6 +104,49 @@ extension UIImage {
         } as UIImage?
 
         return outputImage
+    }
+    
+    func aspectCropped(to desiredDimensions: (width: CGFloat, height: CGFloat)) -> UIImage? {
+        let aspectRatio: CGFloat = self.size.width / self.size.height
+        let resizedImage: UIImage?
+        
+        if aspectRatio > 0 {
+            resizedImage = self.resized(width: aspectRatio * desiredDimensions.height, height: desiredDimensions.height)
+        } else {
+            resizedImage = self.resized(width: desiredDimensions.width, height: aspectRatio * desiredDimensions.width)
+        }
+        
+        return resizedImage?.cropped(width: desiredDimensions.width, height: desiredDimensions.height)
+    }
+    
+    func cropped(width: CGFloat, height: CGFloat) -> UIImage? {
+        let widthDifference = self.size.width - width
+        let heightDifference = self.size.height - height
+        
+        if min(widthDifference, heightDifference) < 0 {
+            print("Not large enough to crop UIImage: " + self.description)
+            return self
+        }
+
+        let newRect = CGRect(x: widthDifference / 2.0, y: heightDifference / 2.0, width: width, height: height)
+        guard let croppedCGImage = self.cgImage?.cropping(to: newRect) else {
+            print("Casting self.cgImage attribute failed during cropped(height:width:) call of UIImage: " + self.description)
+            return nil
+        }
+
+        return UIImage(cgImage: croppedCGImage)
+    }
+    
+    func resized(width: CGFloat, height: CGFloat) -> UIImage? {
+        let newSize = CGSize(width: width, height: height)
+        let newRect = CGRect(origin: CGPoint.zero, size: newSize)
+        
+        UIGraphicsBeginImageContextWithOptions(newSize, false, 0.0)
+        self.draw(in: newRect)
+        let newImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        
+        return newImage
     }
     
     func pixelBuffer() -> CVPixelBuffer? {
