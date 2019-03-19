@@ -11,43 +11,33 @@ import MobileCoreServices
 import Photos
 import CoreML
 
-// TODO: nicer functions for applying style transfer
-// TODO: import image crop/resize to MLModel dimensions
-// TODO: crop output to 600 * 600
-// TODO: visual niceties
-// TODO: save/share styled image?
-
+/// Style Model selection
 enum StyleModel: String, CaseIterable {
-    case wave = "The Great Wave"
-    case night = "Starry Night"
-    case scream = "The Scream"
-    case starfleet = "Starfleet"
     case jupiter = "The Surface of Jupiter"
+    case scream = "The Scream"
+    case night = "Starry Night"
+    case starfleet = "Starfleet"
+    case wave = "The Great Wave"
     
-    
-    
-    var model: MLModel? {
-        switch self {
-            case .jupiter: return Jupiter()
-            default: return nil
-        }
+    init(index: Int) {
+        self = StyleModel.allCases[index]
     }
     
     var styleArray: MLMultiArray {
-        guard let styleArray = try? MLMultiArray(shape: [1] as [NSNumber], dataType: MLMultiArrayDataType.double) else {
+        guard let styleArray = try? MLMultiArray(shape: [5] as [NSNumber], dataType: MLMultiArrayDataType.double) else {
             fatalError("Could not initialise MLMultiArray for MLModel options.")
         }
         
-        styleArray[0] = 1.0
+        styleArray[self.styleIndex] = 1.0
         return styleArray
     }
     
     var name: String { return self.rawValue }
+    var styleIndex: Int { return StyleModel.allCases.firstIndex(of: self)! }
     static var constraints: CGSize { return CGSize(width: 800, height: 800) }
-    static var models: [StyleModel] { return self.allCases.filter { $0.model != nil } }
-    static func `case`(for index: Int) -> StyleModel { return StyleModel.models[index] }
 }
 
+/// App main ViewController
 class ViewController: UIViewController, UINavigationControllerDelegate, UIPickerViewDelegate {
     
     // MARK: Outlets
@@ -67,7 +57,7 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIPicker
     private var outputImage: UIImage?
     private var modelSelection: StyleModel {
         let selectedModelIndex = modelSelector.selectedRow(inComponent: 0)
-        return StyleModel.case(for: selectedModelIndex)
+        return StyleModel(index: selectedModelIndex)
     }
     
     // MARK: View Functions
@@ -85,7 +75,7 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIPicker
     private func refresh() {
         switch (inputImage == nil, outputImage == nil) {
             case (false, false): imageView.image = outputImage
-                transferStyleButton.disable()
+                transferStyleButton.enable()
                 shareButton.enable()
             
             case (false, true): imageView.image = inputImage
@@ -145,15 +135,15 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIPicker
 extension ViewController: UIImagePickerControllerDelegate {
     @objc func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
         let rawImage = info[UIImagePickerController.InfoKey.originalImage] as? UIImage
-        inputImage = rawImage?.aspectFillCropped(to: StyleModel.constraints)
+        inputImage = rawImage?.aspectFilled(to: StyleModel.constraints)
         outputImage = nil
         
         picker.dismiss(animated: true)
         refresh()
-//        
-//        if inputImage == nil {
-//            summonAlertView(message: "Image was malformed or too small (must be at least \(StyleModel.constraints.width) * \(StyleModel.constraints.height)).")
-//        }
+        
+        if inputImage == nil {
+            summonAlertView(message: "Image was malformed or too small (must be at least \(StyleModel.constraints.width) * \(StyleModel.constraints.height)).")
+        }
     }
 }
 
@@ -163,10 +153,10 @@ extension ViewController: UIPickerViewDataSource {
     }
     
     func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
-        return StyleModel.models.count
+        return StyleModel.allCases.count
     }
     
     func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
-        return StyleModel.case(for: row).name
+        return StyleModel(index: row).name
     }
 }

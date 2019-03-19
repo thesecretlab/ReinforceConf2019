@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		413082622237767E006D5DB6 /* Jupiter.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = 413082612237767E006D5DB6 /* Jupiter.mlmodel */; };
+		411C14A7224113620008810F /* StyleTransferModel.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = 411C14A6224113620008810F /* StyleTransferModel.mlmodel */; };
 		416E542C222D3BC30033A480 /* Image.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416E542B222D3BC30033A480 /* Image.swift */; };
 		6E197B1E222CAE4600CDB6B1 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E197B1D222CAE4600CDB6B1 /* AppDelegate.swift */; };
 		6E197B20222CAE4600CDB6B1 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E197B1F222CAE4600CDB6B1 /* ViewController.swift */; };
@@ -17,7 +17,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		413082612237767E006D5DB6 /* Jupiter.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; path = Jupiter.mlmodel; sourceTree = "<group>"; };
+		411C14A6224113620008810F /* StyleTransferModel.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; path = StyleTransferModel.mlmodel; sourceTree = "<group>"; };
 		416E542B222D3BC30033A480 /* Image.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Image.swift; sourceTree = "<group>"; };
 		6E197B1A222CAE4600CDB6B1 /* NSTDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NSTDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6E197B1D222CAE4600CDB6B1 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -58,7 +58,7 @@
 		6E197B1C222CAE4600CDB6B1 /* NSTDemo */ = {
 			isa = PBXGroup;
 			children = (
-				413082612237767E006D5DB6 /* Jupiter.mlmodel */,
+				411C14A6224113620008810F /* StyleTransferModel.mlmodel */,
 				416E542B222D3BC30033A480 /* Image.swift */,
 				6E197B1D222CAE4600CDB6B1 /* AppDelegate.swift */,
 				6E197B1F222CAE4600CDB6B1 /* ViewController.swift */,
@@ -142,8 +142,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				6E197B20222CAE4600CDB6B1 /* ViewController.swift in Sources */,
+				411C14A7224113620008810F /* StyleTransferModel.mlmodel in Sources */,
 				6E197B1E222CAE4600CDB6B1 /* AppDelegate.swift in Sources */,
-				413082622237767E006D5DB6 /* Jupiter.mlmodel in Sources */,
 				416E542C222D3BC30033A480 /* Image.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
