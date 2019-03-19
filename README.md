@@ -18,10 +18,10 @@ In the **StyleModel.swift** file, there is the declaration of an enum called **S
 
 If a new .mlmodel file has been trained to replace the old one, some changes may need to be made.
 
-* the **enum cases** should list all model style options in the order they were input into training (this will often be alphabetical by image filename): the case name can be anything, the String rawValue should be how you want it listed in the app
-* the **model** variable type and return value must match the name of your .mlmodel file
-* the **constraints** for input size must match those listed in the .mlmodel details (see below)
-* the **styles** variable return value can be replaced with an array literal to enable only certain styles to be visible and accessible in the app
+1. the **enum cases** should list all model style options in the order they were input into training (this will often be alphabetical by image filename): the case name can be anything, the String rawValue should be how you want it listed in the app
+2. the **model** variable type and return value must match the name of your .mlmodel file
+3. the **constraints** for input size must match those listed in the .mlmodel details (see below)
+4. the **styles** variable return value can be replaced with an array literal to enable only certain styles to be visible and accessible in the app
 
 ![Screenshot of StyleTransferModel.ml details](Assets/ModelDetails.png)
 
