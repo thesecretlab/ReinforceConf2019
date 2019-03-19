@@ -10,7 +10,7 @@ Aside from the written content, a simple demo app was written in Swift 5 using t
 
 **(STUFF WILL GO HERE)**
 
-## Modifying code
+### Modifying code
 
 In the **StyleModel.swift** file, there is the declaration of an enum called **StyleModel**. It looks as follows:
 
