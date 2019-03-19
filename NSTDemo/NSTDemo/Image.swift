@@ -94,7 +94,7 @@ extension UIImage{
     func styled(with modelSelection: StyleModel) -> UIImage? {
         guard let inputPixelBuffer = self.pixelBuffer() else { return nil }
 
-        let model = Jupiter()
+        let model = modelSelection.model
         let transformation = try? model.prediction(image: inputPixelBuffer, index: modelSelection.styleArray)
         guard let outputPixelBuffer = transformation?.stylizedImage else { return nil }
         
@@ -124,8 +124,9 @@ extension UIImage{
         let widthDifference = Int(self.size.width - size.width)
         let heightDifference = Int(self.size.height - size.height)
         let (width, height) = (Int(size.width), Int(size.height))
+        if widthDifference + heightDifference == 0 { return self }
         
-        if min(widthDifference, heightDifference) < 0 || widthDifference + heightDifference == 0 {
+        if min(widthDifference, heightDifference) < 0 {
             print("Not large enough to crop UIImage: " + self.description)
             return nil
         }

@@ -24,6 +24,15 @@ enum StyleModel: String, CaseIterable {
     case starfleet = "Starfleet"
     case jupiter = "The Surface of Jupiter"
     
+    
+    
+    var model: MLModel? {
+        switch self {
+            case .jupiter: return Jupiter()
+            default: return nil
+        }
+    }
+    
     var styleArray: MLMultiArray {
         guard let styleArray = try? MLMultiArray(shape: [1] as [NSNumber], dataType: MLMultiArrayDataType.double) else {
             fatalError("Could not initialise MLMultiArray for MLModel options.")
@@ -35,7 +44,8 @@ enum StyleModel: String, CaseIterable {
     
     var name: String { return self.rawValue }
     static var constraints: CGSize { return CGSize(width: 800, height: 800) }
-    static func `case`(for index: Int) -> StyleModel { return StyleModel.allCases[index] }
+    static var models: [StyleModel] { return self.allCases.filter { $0.model != nil } }
+    static func `case`(for index: Int) -> StyleModel { return StyleModel.models[index] }
 }
 
 class ViewController: UIViewController, UINavigationControllerDelegate, UIPickerViewDelegate {
@@ -140,10 +150,10 @@ extension ViewController: UIImagePickerControllerDelegate {
         
         picker.dismiss(animated: true)
         refresh()
-        
-        if inputImage == nil {
-            summonAlertView(message: "Image was malformed or too small (must be at least \(StyleModel.constraints.width) * \(StyleModel.constraints.height)).")
-        }
+//        
+//        if inputImage == nil {
+//            summonAlertView(message: "Image was malformed or too small (must be at least \(StyleModel.constraints.width) * \(StyleModel.constraints.height)).")
+//        }
     }
 }
 
@@ -153,7 +163,7 @@ extension ViewController: UIPickerViewDataSource {
     }
     
     func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
-        return StyleModel.allCases.count
+        return StyleModel.models.count
     }
     
     func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
