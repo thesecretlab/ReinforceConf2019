@@ -9,35 +9,8 @@
 import UIKit
 import MobileCoreServices
 import Photos
-import CoreML
 
-/// Style Model selection
-enum StyleModel: String, CaseIterable {
-    case jupiter = "The Surface of Jupiter"
-    case scream = "The Scream"
-    case night = "Starry Night"
-    case starfleet = "Starfleet"
-    case wave = "The Great Wave"
-    
-    init(index: Int) {
-        self = StyleModel.allCases[index]
-    }
-    
-    var styleArray: MLMultiArray {
-        guard let styleArray = try? MLMultiArray(shape: [5] as [NSNumber], dataType: MLMultiArrayDataType.double) else {
-            fatalError("Could not initialise MLMultiArray for MLModel options.")
-        }
-        
-        styleArray[self.styleIndex] = 1.0
-        return styleArray
-    }
-    
-    var name: String { return self.rawValue }
-    var styleIndex: Int { return StyleModel.allCases.firstIndex(of: self)! }
-    static var constraints: CGSize { return CGSize(width: 800, height: 800) }
-}
 
-/// App main ViewController
 class ViewController: UIViewController, UINavigationControllerDelegate, UIPickerViewDelegate {
     
     // MARK: Outlets
@@ -72,6 +45,11 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIPicker
         refresh()
     }
     
+    /// Disables and enables controls based on presence of input to Style Transfer and output to Share
+    ///
+    /// `if (input but no output) then  { enable NST function }`
+    /// `else if (input and output) then { enable NST and Share function }`
+    /// `else if (no input) then { disable both }`
     private func refresh() {
         switch (inputImage == nil, outputImage == nil) {
             case (false, false): imageView.image = outputImage
@@ -135,14 +113,14 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIPicker
 extension ViewController: UIImagePickerControllerDelegate {
     @objc func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
         let rawImage = info[UIImagePickerController.InfoKey.originalImage] as? UIImage
-        inputImage = rawImage?.aspectFilled(to: StyleModel.constraints)
+        inputImage = rawImage?.aspectFilled(to: modelSelection.constraints)
         outputImage = nil
         
         picker.dismiss(animated: true)
         refresh()
         
         if inputImage == nil {
-            summonAlertView(message: "Image was malformed or too small (must be at least \(StyleModel.constraints.width) * \(StyleModel.constraints.height)).")
+            summonAlertView(message: "Image was malformed or too small (must be at least \(modelSelection.constraints.width) * \(modelSelection.constraints.height)).")
         }
     }
 }
@@ -153,7 +131,7 @@ extension ViewController: UIPickerViewDataSource {
     }
     
     func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
-        return StyleModel.allCases.count
+        return StyleModel.styles.count
     }
     
     func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {

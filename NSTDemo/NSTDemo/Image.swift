@@ -12,89 +12,18 @@
 import UIKit
 import CoreML
 
-// MARK: CVPixelBuffer Extensions
-
-extension CVPixelBufferLockFlags {
-    static let readAndWrite = CVPixelBufferLockFlags(rawValue: 0)
-}
-
-extension CVPixelBuffer {
-    var width: Int { return CVPixelBufferGetWidth(self) }
-    var height: Int { return CVPixelBufferGetHeight(self) }
-    var bytesPerRow: Int { return CVPixelBufferGetBytesPerRow(self) }
-    var baseAddress: UnsafeMutableRawPointer? { return CVPixelBufferGetBaseAddress(self) }
-    
-    func perform<T>(permission: CVPixelBufferLockFlags, action: () -> (T?)) -> T? {
-        CVPixelBufferLockBaseAddress(self, permission)      // lock memory
-        let output = action()                               // do the thing
-        CVPixelBufferUnlockBaseAddress(self, permission)    // unlock memory
-        return output                                       // return output of doing thing
-    }
-}
-
-// MARK: CGContext Extensions
-
-extension CGColorSpace {
-    static var deviceRGB: CGColorSpace { return CGColorSpaceCreateDeviceRGB() }
-}
-
-extension CGContext {
-    static func createContext(for pixelBuffer: CVPixelBuffer) -> CGContext? {
-        return CGContext(
-            data: pixelBuffer.baseAddress,
-            width: pixelBuffer.width,
-            height: pixelBuffer.height,
-            bitsPerComponent: 8,
-            bytesPerRow: pixelBuffer.bytesPerRow,
-            space: CGColorSpace.deviceRGB,
-            bitmapInfo: CGBitmapInfo.byteOrder32Little.rawValue | CGImageAlphaInfo.noneSkipFirst.rawValue
-        )
-    }
-    
-    func makeUIImage() -> UIImage? {
-        if let cgImage = self.makeImage() {
-            return UIImage(cgImage: cgImage)
-        }
-        
-        return nil
-    }
-}
-
-// MARK: UIColor Extensions
-
-extension UIColor {
-    static let systemBlue = UIColor(red: 0/255, green: 122/255, blue: 255/255, alpha: 1)
-}
-
-// MARK: UIButton/UIControl  Extensions
-
-extension UIButton {
-    func enable() {
-        self.isEnabled = true
-        self.backgroundColor = UIColor.systemBlue
-    }
-    
-    func disable() {
-        self.isEnabled = false
-        self.backgroundColor = UIColor.lightGray
-    }
-}
-
-extension UIBarButtonItem {
-    func enable() { self.isEnabled = true }
-    func disable() { self.isEnabled = false }
-}
-
 // MARK: UIImage Extensions
 
 extension UIImage{
     
     static var placeholder = UIImage(named: "placeholder.png")!
     
+    /// Attempts Neural Style Transfer upon UIImage with given .mlmodel and input options
+    /// - parameter modelSelection: StyleModel enum case selected to pass as .mlmodel option
     func styled(with modelSelection: StyleModel) -> UIImage? {
         guard let inputPixelBuffer = self.pixelBuffer() else { return nil }
 
-        let model = StyleTransferModel()
+        let model = modelSelection.model
         let transformation = try? model.prediction(image: inputPixelBuffer, index: modelSelection.styleArray)
         guard let outputPixelBuffer = transformation?.stylizedImage else { return nil }
         
@@ -106,6 +35,9 @@ extension UIImage{
         return outputImage
     }
     
+    /// Returns copy of image .aspectFill-ed to given size with excess cropped,
+    /// which maintains as much of original image as possible
+    /// - parameter size: Size to fit new image into
     func aspectFilled(to size: CGSize) -> UIImage? {
         let (width, height) = (Int(size.width), Int(size.height))
         let aspectRatio: CGFloat = self.size.width / self.size.height
@@ -120,6 +52,8 @@ extension UIImage{
         return self.resized(to: intermediateSize)?.cropped(to: size)
     }
     
+    /// Returns copy of image resized to given size
+    /// - parameter size: Size to fit new image into
     func resized(to size: CGSize) -> UIImage? {
         let newRect = CGRect(origin: CGPoint.zero, size: size)
         
@@ -131,6 +65,8 @@ extension UIImage{
         return newImage
     }
     
+    /// Returns copy of image cropped to given size
+    /// - parameter size: Size to fit new image into
     func cropped(to size: CGSize) -> UIImage? {
         guard let cgImage = self.cgImage else { return nil }
         
@@ -156,6 +92,7 @@ extension UIImage{
         return croppedImage
     }
     
+    /// Creates and returns CVPixelBuffer for given image, size and attributes
     func pixelBuffer() -> CVPixelBuffer? {
         guard let image = self.cgImage else { return nil }
         let dimensions: (height: Int, width: Int) = (Int(self.size.width), Int(self.size.height))
