@@ -35,7 +35,7 @@ Once you've got [TuriCreate](https://github.com/apple/turicreate) up and running
 
 ![Screenshot of image folders used to train included model](Assets/folders.png)
 
-At the same level as the folders, add the **train_nst.py** script, and execute it using the following comment: `python train_nst.py` 
+At the same level as the folders, add the **train_nst.py** script, and execute it using the command `python train_nst.py`.
 
 Now, sit back and wait for your computer to train a model. Depending on how many styles you ask it to train, and how many content images you provide, this could take upwards of 2 days!
 
