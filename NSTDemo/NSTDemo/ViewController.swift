@@ -100,12 +100,14 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIPicker
     // MARK: Functionality
     
     private func performStyleTransfer() {
-        guard let styledImage = inputImage?.styled(with: modelSelection) else {
+        let styledImage = inputImage?.styled(with: modelSelection)
+        
+        if styledImage == nil {
             summonAlertView()
-            return
+        } else {
+            outputImage = styledImage
         }
         
-        outputImage = styledImage
         refresh()
     }
 }
@@ -115,7 +117,7 @@ extension ViewController: UIImagePickerControllerDelegate {
         let rawImage = info[UIImagePickerController.InfoKey.originalImage] as? UIImage
         inputImage = rawImage?.aspectFilled(to: modelSelection.constraints)
         outputImage = nil
-        
+
         picker.dismiss(animated: true)
         refresh()
         
