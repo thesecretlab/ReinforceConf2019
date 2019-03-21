@@ -39,6 +39,8 @@ extension UIImage{
     /// which maintains as much of original image as possible
     /// - parameter size: Size to fit new image into
     func aspectFilled(to size: CGSize) -> UIImage? {
+        if self.size == size { return self }
+        
         let (width, height) = (Int(size.width), Int(size.height))
         let aspectRatio: CGFloat = self.size.width / self.size.height
         let intermediateSize: CGSize
