@@ -18,14 +18,16 @@ extension MLMultiArray {
     /// - parameters:
     ///     - size: Number of options
     ///     - index: Index to change to 1.0
-    convenience init(size: Int, selecting index: Int) {
+    convenience init(size: Int, selecting selectedIndex: Int) {
         do {
             try self.init(shape: [size] as [NSNumber], dataType: MLMultiArrayDataType.double)
         } catch {
             fatalError("Could not initialise MLMultiArray for MLModel options.")
         }
         
-        self[index] = 1.0
+        for index in 0..<size {
+            self[index] = index == selectedIndex ? 1.0 : 0.0
+        }
     }
 }
 
