@@ -26,7 +26,7 @@ extension MLMultiArray {
         }
         
         for index in 0..<size {
-            self[index] = index == selectedIndex ? 1.0 : 0.0
+            self[index] = (index == selectedIndex) ? 1.0 : 0.0
         }
     }
 }
