@@ -12,20 +12,14 @@ import CoreML
 enum StyleModel: String, CaseIterable {
     // List models (named whatever you like) and their names to display in the app
     // These must be in the order they were input into training (likely alphabetical in filename)
-//    case abstract = "Abstract"
-//    case brick = "Brick"
-//    case flower = "Flower"
-//    case foliage = "Foliage"
-//    case honeycomb = "Honeycomb"
-//    case mosaic = "Mosaic"
-//    case picasso = "Picasso"
-//    case synth = "Synth"
-    case jupiter = "The Surface of Jupiter"
-    case scream = "The Scream"
-    case night = "Starry Night"
-    case starfleet = "Starfleet"
-    case wave = "The Great Wave"
-    case geometric = "Geometric"
+    case abstract = "Abstract"
+    case brick = "Brick"
+    case flower = "Flower"
+    case foliage = "Foliage"
+    case honeycomb = "Honeycomb"
+    case mosaic = "Mosaic"
+    case picasso = "Picasso"
+    case synth = "Synth"
     
     var model: StyleTransferModel { return StyleTransferModel() } // Rename this to your own .mlmodel file name
     var constraints: CGSize { return CGSize(width: 800, height: 800) } // Change if your own model has different constraints

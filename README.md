@@ -31,7 +31,7 @@ Once you've got [TuriCreate](https://github.com/apple/turicreate) up and running
 
 * **content** — place a collection of images of the type you'd like the style transfer to work on in here (ideally lots of images representing a vast range of content: people, animals, landscapes, objects, everything)
 * **style** – place as many different style images as you'd like to be able to transfer in here (the images you want your created images to imitate the style of)
-* **testing** – place a collection of images of the same type as the content images in here, so you can potentially evaluate your style transfer model for effectiveness (like the first category but needs less images, content doesn't really matter but will benefit from being varied)
+* **test** – place a collection of images of the same type as the content images in here, so you can potentially evaluate your style transfer model for effectiveness (like the first category but needs less images, content doesn't really matter but will benefit from being varied)
 
 ![Screenshot of image folders used to train included model](Assets/folders.png)
 
